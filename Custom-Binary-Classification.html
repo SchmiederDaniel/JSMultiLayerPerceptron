@@ -14,6 +14,7 @@
     <script type="text/javascript" src="neuralnetwork/LossFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/ActivationFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/Initialization.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Visualizer.js"></script>
     <style>
         * {
             padding: 0;
@@ -77,11 +78,11 @@
         let learning_rate = 0.3;
         let lossFunction = new BinaryCrossEntropy();
         let neuralNetwork = new NetworkBuilder()
-            .layer.dense(2, 16)
+            .layer.dense(2, 10)
             .activation.sigmoid()
-            .layer.dense(16, 16)
+            .layer.dense(10, 8)
             .activation.sigmoid()
-            .layer.dense(16, 1)
+            .layer.dense(8, 1)
             .activation.sigmoid()
             .build();
         draw();
@@ -113,6 +114,8 @@
                 let y = dot[1];
                 drawCircle(x * canvas.width, y * canvas.height, 12, "red");
             }
+
+            //new Visualizer(neuralNetwork, canvas, context).draw(0, 0, canvas.width, canvas.height, "white");
         }
 
         function drawBackground() {

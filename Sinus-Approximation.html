@@ -15,6 +15,7 @@
     <script type="text/javascript" src="neuralnetwork/LossFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/ActivationFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/Initialization.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Visualizer.js"></script>
     <style>
         * {
             padding: 0;
@@ -74,13 +75,13 @@
         let learning_rate = 0.2;
         let lossFunction = new MeanSquareError();
         let neuralNetwork = new NetworkBuilder()
-            .layer.dense(1, 20)
+            .layer.dense(1, 4)
             .activation.sigmoid()
-            .layer.dense(20, 16)
+            .layer.dense(4, 4)
             .activation.sigmoid()
-            .layer.dense(16, 6)
+            .layer.dense(4, 3)
             .activation.sigmoid()
-            .layer.dense(6, 1)
+            .layer.dense(3, 1)
             .activation.sigmoid()
             .build();
 
@@ -142,6 +143,8 @@
                 context.lineTo(x * canvas.width, y * canvas.height);
             }
             context.stroke();
+
+            //new Visualizer(neuralNetwork, canvas, context).draw(0, 0, canvas.width, canvas.height, "white");
         }
     </script>
 </body>

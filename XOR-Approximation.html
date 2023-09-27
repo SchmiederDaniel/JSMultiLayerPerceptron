@@ -14,6 +14,7 @@
     <script type="text/javascript" src="neuralnetwork/LossFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/ActivationFunctions.js"></script>
     <script type="text/javascript" src="neuralnetwork/Initialization.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Visualizer.js"></script>
     <style>
         * {
             padding: 0;
@@ -21,51 +22,57 @@
             font: bold 24px Arial;
             color: white;
         }
+
         body {
             align-items: center;
             width: 100%;
             height: 100%;
         }
+
         canvas {
-            float:right;
+            float: right;
             width: calc(100% - 400px);
             height: 100%;
             background-color: black;
         }
+
         #sidebar {
-            float:left;
+            float: left;
             width: 400px;
             height: 100%;
             background-color: rgb(38, 64, 94);
+            overflow-y: scroll;
         }
+
         #trainStepsSecond,
         #explaination {
             padding: 15px;
         }
     </style>
 </head>
+
 <body>
     <canvas id="canvas"></canvas>
     <div id="sidebar">
         <p id="trainStepsSecond">Training steps per second:</p>
-<div id="explaination">
-Explaination:<br>
-This is a visualization of a neuralnetwork which approximates how a XOR function should look like.<br>
-<br>
-The x axis is the first input and the y axis is the second input.
-The top left pixel begins with 0 and goes down to 1 and the width goes from 0 to 1 too;<br>
-<br>
-The training data looks like this:<br>
-<br>
-input [1, 1] -> output 0<br>
-input [1, 0] -> output 1<br>
-input [0, 1] -> output 1<br>
-input [0, 0] -> output 0<br><br>
-<br>
-So while the neuralnetwork has never seen how the middle of the image should look like.<br>
-<br>
-For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the image.
-</div>  
+        <div id="explaination">
+            Explaination:<br>
+            This is a visualization of a neuralnetwork which approximates how a XOR function should look like.<br>
+            <br>
+            The x axis is the first input and the y axis is the second input.
+            The top left pixel begins with 0 and goes down to 1 and the width goes from 0 to 1 too;<br>
+            <br>
+            The training data looks like this:<br>
+            <br>
+            input [1, 1] -> output 0<br>
+            input [1, 0] -> output 1<br>
+            input [0, 1] -> output 1<br>
+            input [0, 0] -> output 0<br><br>
+            <br>
+            So while the neuralnetwork has never seen how the middle of the image should look like.<br>
+            <br>
+            For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the image.
+        </div>
     </div>
     <script>
         window.onresize = (e) => resize();
@@ -76,14 +83,14 @@ For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the i
         }
 
         let learning_rate = 0.3;
-        let lossFunction = new BinaryCrossEntropy();
-        let neuralNetwork = new NetworkBuilder()
+        const lossFunction = new BinaryCrossEntropy();
+        const neuralNetwork = new NetworkBuilder()
             .layer.dense(2, 4)
             .activation.sigmoid()
             .layer.dense(4, 1)
             .activation.sigmoid()
             .build();
-        let context = canvas.getContext("2d");
+        const context = canvas.getContext("2d");
 
         const TRAIN_DATA = [
             [[1, 1], [0]],
@@ -106,6 +113,7 @@ For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the i
         setInterval(drawLoop, 32);
         function drawLoop() {
             context.clearRect(0, 0, canvas.width, canvas.height);
+
             let r = 20;
             let minSize = Math.min(canvas.width, canvas.height);
             let pixelSize = minSize / r;
@@ -120,6 +128,8 @@ For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the i
                     context.fillRect(canvasX, canvasY, Math.ceil(pixelSize), Math.ceil(pixelSize));
                 }
             }
+
+            //new Visualizer(neuralNetwork, canvas, context).draw(0, 0, canvas.width, canvas.height, "darkgreen");
         }
 
         setInterval(fpsCounter, 1000);
