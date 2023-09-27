@@ -170,7 +170,7 @@ class NumpyArray {
         return new NumpyArray(newData);
     }
 
-    multiplyScalar(other) {
+    multiply(other) {
         if (isNumber(other)) {
             let newData = array(this.rows(), this.cols());
             for (let rowIndex = 0; rowIndex < this.rows(); rowIndex++) {

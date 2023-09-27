@@ -20,7 +20,7 @@ class ActivationInterface extends LayerInterface {
     activation(input) { };
 
     backward(output_gradient, learning_rate) {
-        return output_gradient.multiplyScalar(this.activation_prime(this.input));
+        return output_gradient.multiply(this.activation_prime(this.input));
     }
 
     activation_prime(input) { };
@@ -138,8 +138,8 @@ class Dense extends LayerInterface {
         // TODO: dimension output_gradient = (1, 1)
         let weights_gradient = output_gradient.dot(this.input.transpose());
         let input_gradient = this.weights.transpose().dot(output_gradient);
-        this.weights = this.weights.subtract(weights_gradient.multiplyScalar(learning_rate));
-        this.bias = this.bias.subtract(output_gradient.multiplyScalar(learning_rate)); // idk if activation is a vector or matrix
+        this.weights = this.weights.subtract(weights_gradient.multiply(learning_rate));
+        this.bias = this.bias.subtract(output_gradient.multiply(learning_rate)); // idk if activation is a vector or matrix
         return input_gradient;
     }
 
