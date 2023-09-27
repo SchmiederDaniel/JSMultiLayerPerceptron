@@ -75,13 +75,11 @@
         let learning_rate = 0.2;
         let lossFunction = new MeanSquareError();
         let neuralNetwork = new NetworkBuilder()
-            .layer.dense(1, 4)
+            .layer.dense(1, 8)
             .activation.sigmoid()
-            .layer.dense(4, 4)
+            .layer.dense(8, 8)
             .activation.sigmoid()
-            .layer.dense(4, 3)
-            .activation.sigmoid()
-            .layer.dense(3, 1)
+            .layer.dense(8, 1)
             .activation.sigmoid()
             .build();
 
