@@ -1,0 +1,159 @@
+<html>
+
+<head>
+    <script>
+        array = (rows, cols) => new Array(rows).fill(0).map(() => new Array(cols).fill(0));
+        isNumber = (object) => typeof (object) === "number";
+        arrayToString = (twoDimArray) => "[" + twoDimArray.reduce((sum, array) => sum + "[" + array + "], ", 0).replace(/^0/, "").replace(/, $/, "") + "]";
+        flatten = (ar) => ar.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+    </script>
+    <script type="text/javascript" src="neuralnetwork/NumpyArray.js"></script>
+    <script type="text/javascript" src="neuralnetwork/NeuralNetwork.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Distributions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Layers.js"></script>
+    <script type="text/javascript" src="neuralnetwork/LossFunctions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/ActivationFunctions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Initialization.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            font: bold 24px Arial;
+            color: white;
+        }
+
+        body {
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            float: right;
+            width: calc(100% - 400px);
+            height: 100%;
+            background-color: black;
+        }
+
+        #sidebar {
+            float: left;
+            width: 400px;
+            height: 100%;
+            background-color: rgb(38, 64, 94);
+        }
+
+        #trainStepsSecond,
+        #explaination {
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" oncontextmenu="return false;" onmousedown="onMouseDown(event)"></canvas>
+    <div id="sidebar">
+        <div id="explaination">
+            Explaination:<br>
+            You can place green dots with your left mouse button and red dots with your right mouse button.<br>
+            <br>
+            The neuralnetwork will then try to separate these dots by training on them.<br>
+            <br>
+            Its the same like the Tensorflow playground:
+            <a href="https://playground.tensorflow.org">https://playground.tensorflow.org</a>
+      </div>
+    </div>
+    <script>
+        window.onresize = (e) => resize();
+        resize();
+        function resize() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+
+        let context = canvas.getContext('2d');
+        let redDots = [];
+        let greenDots = [];
+
+        let learning_rate = 0.3;
+        let lossFunction = new BinaryCrossEntropy();
+        let neuralNetwork = new NetworkBuilder()
+            .layer.dense(2, 16)
+            .activation.sigmoid()
+            .layer.dense(16, 16)
+            .activation.sigmoid()
+            .layer.dense(16, 1)
+            .activation.sigmoid()
+            .build();
+        draw();
+        setInterval(draw, 0)
+        setInterval(train, 0)
+
+        function onMouseDown(event) {
+            let mouseX = (event.clientX - canvas.offsetLeft) / canvas.clientWidth;
+            let mouseY = (event.clientY - canvas.offsetTop) / canvas.clientHeight;
+
+            if (event.button == 0) {
+                greenDots.push([mouseX, mouseY]);
+            } else if (event.button == 2) {
+                redDots.push([mouseX, mouseY]);
+            }
+        }
+
+        function draw() {
+            drawBackground();
+
+            for (let dot of greenDots) {
+                let x = dot[0];
+                let y = dot[1];
+                drawCircle(x * canvas.width, y * canvas.height, 12, "green");
+            }
+
+            for (let dot of redDots) {
+                let x = dot[0];
+                let y = dot[1];
+                drawCircle(x * canvas.width, y * canvas.height, 12, "red");
+            }
+        }
+
+        function drawBackground() {
+            let r = 60;
+            let pixelWidth = canvas.width / r;
+            let pixelHeight = canvas.height / r;
+            for (let x = 0; x < r; x++) {
+                for (let y = 0; y < r; y++) {
+                    let canvasX = x * pixelWidth;
+                    let canvasY = y * pixelHeight;
+
+                    let numpyArray = neuralNetwork.predict(NumpyArray.of(x / r, y / r));
+                    let value = Math.floor(numpyArray.data[0][0] * 255);
+                    context.fillStyle = "rgb(" + (255 - value) + "," + value + "," + 0 + ")";
+                    context.fillRect(canvasX, canvasY, Math.ceil(pixelWidth), Math.ceil(pixelHeight));
+                }
+            }
+        }
+
+        function train() {
+            for (let i = 0; i < 10; i++) {
+                for (const dot of greenDots) {
+                    neuralNetwork.trainSingle(lossFunction, dot, [1], learning_rate);
+                }
+
+                for (const dot of redDots) {
+                    neuralNetwork.trainSingle(lossFunction, dot, [0], learning_rate);
+                }
+            }
+        }
+
+        function drawCircle(centerX, centerY, radius, color) {
+            context.beginPath();
+            context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            context.fillStyle = color;
+            context.fill();
+            context.lineWidth = 3;
+            context.strokeStyle = "white";
+            context.stroke();
+        }
+    </script>
+</body>
+
+</html>

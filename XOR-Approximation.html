@@ -1,0 +1,133 @@
+<html>
+
+<head>
+    <script>
+        array = (rows, cols) => new Array(rows).fill(0).map(() => new Array(cols).fill(0));
+        isNumber = (object) => typeof (object) === "number";
+        arrayToString = (twoDimArray) => "[" + twoDimArray.reduce((sum, array) => sum + "[" + array + "], ", 0).replace(/^0/, "").replace(/, $/, "") + "]";
+        flatten = (ar) => ar.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+    </script>
+    <script type="text/javascript" src="neuralnetwork/NumpyArray.js"></script>
+    <script type="text/javascript" src="neuralnetwork/NeuralNetwork.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Distributions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Layers.js"></script>
+    <script type="text/javascript" src="neuralnetwork/LossFunctions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/ActivationFunctions.js"></script>
+    <script type="text/javascript" src="neuralnetwork/Initialization.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            font: bold 24px Arial;
+            color: white;
+        }
+        body {
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            float:right;
+            width: calc(100% - 400px);
+            height: 100%;
+            background-color: black;
+        }
+        #sidebar {
+            float:left;
+            width: 400px;
+            height: 100%;
+            background-color: rgb(38, 64, 94);
+        }
+        #trainStepsSecond,
+        #explaination {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="sidebar">
+        <p id="trainStepsSecond">Training steps per second:</p>
+<div id="explaination">
+Explaination:<br>
+This is a visualization of a neuralnetwork which approximates how a XOR function should look like.<br>
+<br>
+The x axis is the first input and the y axis is the second input.
+The top left pixel begins with 0 and goes down to 1 and the width goes from 0 to 1 too;<br>
+<br>
+The training data looks like this:<br>
+<br>
+input [1, 1] -> output 0<br>
+input [1, 0] -> output 1<br>
+input [0, 1] -> output 1<br>
+input [0, 0] -> output 0<br><br>
+<br>
+So while the neuralnetwork has never seen how the middle of the image should look like.<br>
+<br>
+For example at x=0.5 and y=0.5 it interpolates the colors in the middle of the image.
+</div>  
+    </div>
+    <script>
+        window.onresize = (e) => resize();
+        resize();
+        function resize() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+
+        let learning_rate = 0.3;
+        let lossFunction = new BinaryCrossEntropy();
+        let neuralNetwork = new NetworkBuilder()
+            .layer.dense(2, 4)
+            .activation.sigmoid()
+            .layer.dense(4, 1)
+            .activation.sigmoid()
+            .build();
+        let context = canvas.getContext("2d");
+
+        const TRAIN_DATA = [
+            [[1, 1], [0]],
+            [[1, 0], [1]],
+            [[0, 1], [1]],
+            [[0, 0], [0]]
+        ];
+
+        let tps = 0;
+        setInterval(trainLoop, 0);
+        async function trainLoop() {
+            tps++;
+            for (const element of TRAIN_DATA) {
+                let input = element[0];
+                let target = element[1];
+                neuralNetwork.trainSingle(lossFunction, input, target, learning_rate);
+            }
+        }
+
+        setInterval(drawLoop, 32);
+        function drawLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            let r = 20;
+            let minSize = Math.min(canvas.width, canvas.height);
+            let pixelSize = minSize / r;
+            for (let x = 0; x < r; x++) {
+                for (let y = 0; y < r; y++) {
+                    let canvasX = x * pixelSize;
+                    let canvasY = y * pixelSize;
+
+                    let numpyArray = neuralNetwork.predictThreadSafe(NumpyArray.of(x / r, y / r));
+                    let value = Math.floor(numpyArray.data[0][0] * 255);
+                    context.fillStyle = "rgb(" + value + "," + value + "," + value + ")";
+                    context.fillRect(canvasX, canvasY, Math.ceil(pixelSize), Math.ceil(pixelSize));
+                }
+            }
+        }
+
+        setInterval(fpsCounter, 1000);
+        function fpsCounter() {
+            trainStepsSecond.textContent = "Training steps per second: " + tps;
+            tps = 0;
+        }
+    </script>
+</body>
+
+</html>
